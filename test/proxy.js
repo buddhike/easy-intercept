@@ -128,12 +128,29 @@ describe('proxy', () => {
       proxyFunction('a');
     });
 
-    it('should return true for matching calls', () => {
-      proxyFunction.received('a').should.be.true;
+    it('should return matching calls', () => {
+      proxyFunction.received('a')[0].args[0].should.equal('a');
     });
 
     it('should return false for non-matching calls', () => {
       proxyFunction.received('b').should.be.false;
+    });
+  });
+
+  describe('receivedAny', () => {
+    let proxyFunction;
+
+    beforeEach(() => {
+      proxyFunction = proxy(() => 42);
+      proxyFunction('a');
+    });
+
+    it('should return true for matching calls', () => {
+      proxyFunction.receivedAny('a').should.be.true;
+    });
+
+    it('should return fals for non-matching calls', () => {
+      proxyFunction.receivedAny('b').should.be.false;
     });
   });
 });
