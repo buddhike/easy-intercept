@@ -36,7 +36,7 @@ describe('proxy', () => {
     });
   });
 
-  describe('to throw on specific call', () => {
+  describe('throwing on specific call', () => {
     let target;
 
     beforeEach(() => {
@@ -53,6 +53,23 @@ describe('proxy', () => {
 
       firstCall();
       target().should.equal(42);
+    });
+  });
+
+  describe('throwing on specific args', () => {
+    let target;
+
+    beforeEach(() => {
+      target = proxy(() => 42);
+      target.withArgs('a').throws(new Error('doh'));
+    });
+
+    it('should throw an error for matching args', () => {
+      (() => target('a')).should.throw(/doh/);
+    });
+
+    it('should not throw an error for other calls', () => {
+      target('b').should.equal(42);
     });
   });
 
