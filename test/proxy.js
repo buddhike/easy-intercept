@@ -1,29 +1,5 @@
+import R from 'ramda';
 import proxy from '../lib/proxy';
-
-function Foo() {
-  this.state = 42;
-}
-
-Foo.prototype.bar = function() {
-  return this.state;
-};
-
-describe('prototype functions', () => {
-  it('should see the state of current instance', done => {
-    const foo = new Foo();
-    const f = function() {
-      return foo.bar();
-    };
-
-    f.prototype = foo;
-
-    setTimeout(() => {
-      f().should.equal(42);
-      done();
-    }, 0)
-
-  });
-});
 
 describe('proxy', () => {
   describe('to a function', () => {
@@ -57,6 +33,26 @@ describe('proxy', () => {
       it('should return the configured value for matching input', () => {
         target(42).should.equal(43);
       });
+    });
+  });
+
+  describe('to throw on specific call', () => {
+    let target;
+
+    beforeEach(() => {
+      target = proxy(() => 42);
+      target.onCall(0).throws(new Error('doh'));
+    });
+
+    it('should throw specified error for that call', () => {
+      (() => target()).should.throw(/doh/);
+    });
+
+    it('should not throw an error for other calls', () => {
+      const firstCall = R.tryCatch(target, R.F);
+
+      firstCall();
+      target().should.equal(42);
     });
   });
 
@@ -149,8 +145,44 @@ describe('proxy', () => {
       proxyFunction.receivedAny('a').should.be.true;
     });
 
-    it('should return fals for non-matching calls', () => {
+    it('should return false for non-matching calls', () => {
       proxyFunction.receivedAny('b').should.be.false;
+    });
+  });
+
+  describe('quick calls', () => {
+    let proxyFunction;
+
+    beforeEach(() => {
+      proxyFunction = proxy(() => 42);
+      proxyFunction('a');
+      proxyFunction('b');
+      proxyFunction('c');
+    });
+
+    it('should include the first call', () => {
+      proxyFunction.firstCall().args[0].should.equal('a');
+    });
+
+    it('should include the second call', () => {
+      proxyFunction.secondCall().args[0].should.equal('b');
+    });
+
+    it('should include the third call', () => {
+      proxyFunction.thirdCall().args[0].should.equal('c');
+    });
+  });
+
+  describe('throws', () => {
+    let proxyFunction;
+
+    beforeEach(() => {
+      proxyFunction = proxy(() => 42);
+      proxyFunction.throws(new Error('doh'));
+    });
+
+    it('should throw the specified error', () => {
+      (() => proxyFunction()).should.throw(/doh/);
     });
   });
 });
