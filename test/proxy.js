@@ -202,4 +202,47 @@ describe('proxy', () => {
       (() => proxyFunction()).should.throw(/doh/);
     });
   });
+
+  describe('with an alternative implementation', () => {
+    it('should receive arguments', () => {
+      const target = proxy(() => 42);
+      target.onCall(0).returns(a => a);
+      target(43).should.equal(43);
+    });
+
+    describe('for specific call', () => {
+      let target;
+
+      beforeEach(() => {
+        target = proxy(() => 42);
+        target.onCall(0).returns(() => 43);
+      });
+
+      it('should invoke the alternative impl for matching call', () => {
+        target().should.equal(43);
+      });
+
+      it('should not invoke the alternative impl for other calls', () => {
+        target();
+        target().should.equal(42);
+      });
+    });
+
+    describe('for call with specific args', () => {
+      let target;
+
+      beforeEach(() => {
+        target = proxy(() => 42);
+        target.withArgs('a').returns(() => 43);
+      });
+
+      it('should invoke the alternative impl for matching calls', () => {
+        target('a').should.equal(43);
+      });
+
+      it('should not invoke the alternative impl for other calls', () => {
+        target('b').should.equal(42);
+      });
+    });
+  });
 });
