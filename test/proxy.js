@@ -210,6 +210,17 @@ describe('proxy', () => {
       target(43).should.equal(43);
     });
 
+    it('should provide call info as the last argument', () => {
+      const target = proxy(() => 42);
+
+      target.onCall(0).returns((input, call) => {
+        input.should.equal('a');
+        call.count.should.equal(1);
+      });
+
+      target('a');
+    });
+
     describe('for specific call', () => {
       let target;
 
@@ -242,6 +253,27 @@ describe('proxy', () => {
 
       it('should not invoke the alternative impl for other calls', () => {
         target('b').should.equal(42);
+      });
+    });
+
+    describe('accessing this from an arrow function', () => {
+      function Foo() {
+        this._state = 0;
+
+        this.inc = () => {
+          return this._state++;
+        };
+
+        this.invokeProxy = () => {
+          const p = proxy(() => this.inc() );
+          return p();
+        }
+      }
+
+      it('should provide the correct reference', () => {
+        const f = new Foo();
+        f.invokeProxy();
+        f.invokeProxy().should.equal(1);
       });
     });
   });
