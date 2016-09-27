@@ -298,3 +298,120 @@ describe('with an alternative implementation', () => {
     });
   });
 });
+
+describe('Proxy to an object with functions', () => {
+  let target;
+
+  beforeEach(() => {
+    target = proxy({
+      foo: () => 42,
+      bar: () => 42
+    });
+  });
+
+  it('should allow replacing the return value of a member', () => {
+    target.foo.returns(1);
+    target.foo().should.equal(1);
+  });
+
+  it('should allow throwing an exception from a member', () => {
+    target.foo.throws('doh');
+    (() => target.foo()).should.throw(/doh/);
+  });
+
+  describe('modify return value on call', () => {
+    beforeEach(() => {
+      target.foo.onCall(0).returns(1);
+    });
+
+    it('should return the specified value for matching call', () => {
+      target.foo().should.equal(1);
+    });
+
+    it('should return the original value for the rest', () => {
+      target.foo();
+      target.foo().should.equal(42);
+    });
+  });
+
+  describe('throw on call', () => {
+    beforeEach(() => {
+      target.foo.onCall(0).throws('doh');
+    });
+
+    it('should throw specified error for matching call', () => {
+      (() => target.foo()).should.throw(/doh/);
+    });
+
+    it('should not throw for the rest', () => {
+      try {
+        target.foo();
+      } catch (e) {
+        // noop
+      }
+
+      target.foo().should.equal(42);
+    });
+  });
+
+  describe('modify return value for args', () => {
+    beforeEach(() => {
+      target.foo.withArgs('a').returns(1);
+    });
+
+    it('should return specified value for matching args', () => {
+      target.foo('a').should.equal(1);
+    });
+
+    it('should return original value for the rest', () => {
+      target.foo('b').should.equal(42);
+    });
+  });
+
+  describe('throw an error for args', () => {
+    beforeEach(() => {
+      target.foo.withArgs('a').throws('doh');
+    });
+
+    it('should throw specified error for matching args', () => {
+      (() => target.foo('a')).should.throw(/doh/);
+    });
+
+    it('should not throw for the rest', () => {
+      target.foo('b').should.equal(42);
+    });
+  });
+
+  describe('object context', () => {
+    beforeEach(() => {
+      target = proxy({
+        state: 42,
+        getState: function() {
+          return this.state;
+        }
+      });
+    });
+
+    it('should be visible to proxied function', () => {
+      target.getState().should.equal(42);
+    });
+  });
+
+  describe('constructor function context', () => {
+    function Instance() {
+      this.state = 42;
+    }
+
+    Instance.prototype.getState = function() {
+      return this.state;
+    }
+
+    beforeEach(() => {
+      target = proxy(new Instance());
+    });
+
+    it('should be visible to proxied function', () => {
+      target.getState().should.equal(42);
+    });
+  });
+});
