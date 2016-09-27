@@ -4,7 +4,7 @@
   "description": "Simplest Javascript mocking library on planet!",
   "author": "Buddhike de Silva",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist/proxy.js",
   "scripts": {
     "build": "babel lib/ -d dist/ --source-maps",
     "eslint": "eslint src test",
