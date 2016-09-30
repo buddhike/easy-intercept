@@ -163,6 +163,10 @@ describe('Verifying a received call', () => {
     target.received('b').should.be.false;
   });
 
+  it('should match any argument', () => {
+    target.received(intercept._).length.should.equal(1);
+  });
+
   describe('for multiple invocations', () => {
     it('should return all matching calls', () => {
       target('a');
