@@ -1,26 +1,26 @@
 import R from 'ramda';
-import proxy from '../lib/proxy';
+import intercept from '../lib/intercept';
 
-describe('Proxy to a function', () => {
-  it('should invoke that function', () => {
-    const f = proxy(() => 42);
+describe('Intercepted function', () => {
+  it('should invoke the original function', () => {
+    const f = intercept(() => 42);
     f().should.equal(42);
   });
 });
 
-describe('Proxy to a function with args', () => {
-  it('should pipe the args', () => {
-    const f = proxy(a => a);
+describe('Intercepted function with args', () => {
+  it('should pipe the args to original function', () => {
+    const f = intercept(a => a);
     f(42).should.equal(42);
   });
 });
 
-describe('Proxy that returns specific value for matching input', () => {
+describe('Intercepted returning a specific value for matching input', () => {
   let f;
 
   beforeEach(() => {
-    f = proxy(a => a).withArgs(42).returns(43);
-  })
+    f = intercept(a => a).withArgs(42).returns(43);
+  });
 
   it('should return the configured value for matching input', () => {
     f(42).should.equal(43);
@@ -31,11 +31,11 @@ describe('Proxy that returns specific value for matching input', () => {
   });
 });
 
-describe('Proxy that throws an error for specific args', () => {
+describe('Intercepted throwing an error for specific args', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(a => a);
+    target = intercept(a => a);
     target.withArgs(42).throws(new Error('doh'));
   });
 
@@ -48,11 +48,11 @@ describe('Proxy that throws an error for specific args', () => {
   });
 });
 
-describe('Proxy that returns a specific value on specific call', () => {
+describe('Intercepted returning a value on specific call', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(() => 42);
+    target = intercept(() => 42);
     target.onCall(0).returns(1);
   });
 
@@ -66,11 +66,11 @@ describe('Proxy that returns a specific value on specific call', () => {
   });
 });
 
-describe('Proxy that throws on specific call', () => {
+describe('Intercepted throwing an error on specific call', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(a => a);
+    target = intercept(a => a);
     target.onCall(0).throws(new Error('doh'));
   });
 
@@ -86,11 +86,11 @@ describe('Proxy that throws on specific call', () => {
   });
 });
 
-describe('Proxy with a specific return value', () => {
+describe('Intercepted with a specific return value', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(() => 42);
+    target = intercept(() => 42);
     target.returns(43);
   });
 
@@ -132,7 +132,7 @@ describe('Accessing call information', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(() => 42);
+    target = intercept(() => 42);
     target('a');
     target('b');
   });
@@ -151,7 +151,7 @@ describe('Verifying a received call', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(() => 42);
+    target = intercept(() => 42);
     target('a');
   });
 
@@ -175,7 +175,7 @@ describe('receivedAny', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(() => 42);
+    target = intercept(() => 42);
     target('a');
   });
 
@@ -192,7 +192,7 @@ describe('quick calls', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(() => 42);
+    target = intercept(() => 42);
     target('a');
     target('b');
     target('c');
@@ -215,7 +215,7 @@ describe('throws', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy(() => 42);
+    target = intercept(() => 42);
     target.throws(new Error('doh'));
   });
 
@@ -226,13 +226,13 @@ describe('throws', () => {
 
 describe('with an alternative implementation', () => {
   it('should receive arguments', () => {
-    const target = proxy(() => 42);
+    const target = intercept(() => 42);
     target.onCall(0).returns(a => a);
     target(43).should.equal(43);
   });
 
   it('should provide call info as the last argument', () => {
-    const target = proxy(() => 42);
+    const target = intercept(() => 42);
 
     target.onCall(0).returns((input, call) => {
       input.should.equal('a');
@@ -246,7 +246,7 @@ describe('with an alternative implementation', () => {
     let target;
 
     beforeEach(() => {
-      target = proxy(() => 42);
+      target = intercept(() => 42);
       target.onCall(0).returns(() => 43);
     });
 
@@ -264,7 +264,7 @@ describe('with an alternative implementation', () => {
     let target;
 
     beforeEach(() => {
-      target = proxy(() => 42);
+      target = intercept(() => 42);
       target.withArgs('a').returns(() => 43);
     });
 
@@ -286,7 +286,7 @@ describe('with an alternative implementation', () => {
       };
 
       this.invokeProxy = () => {
-        const p = proxy(() => this.inc() );
+        const p = intercept(() => this.inc());
         return p();
       }
     }
@@ -299,11 +299,11 @@ describe('with an alternative implementation', () => {
   });
 });
 
-describe('Proxy to an object with functions', () => {
+describe('Intercept an object with functions', () => {
   let target;
 
   beforeEach(() => {
-    target = proxy({
+    target = intercept({
       foo: () => 42,
       bar: () => 42
     });
@@ -384,9 +384,9 @@ describe('Proxy to an object with functions', () => {
 
   describe('object context', () => {
     beforeEach(() => {
-      target = proxy({
+      target = intercept({
         state: 42,
-        getState: function() {
+        getState: function () {
           return this.state;
         }
       });
@@ -402,12 +402,12 @@ describe('Proxy to an object with functions', () => {
       this.state = 42;
     }
 
-    Instance.prototype.getState = function() {
+    Instance.prototype.getState = function () {
       return this.state;
     }
 
     beforeEach(() => {
-      target = proxy(new Instance());
+      target = intercept(new Instance());
     });
 
     it('should be visible to proxied function', () => {
