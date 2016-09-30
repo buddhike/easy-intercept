@@ -1,10 +1,11 @@
 {
   "name": "easy-intercept",
   "version": "0.0.1",
-  "description": "Simplest Javascript mocking library on planet!",
+  "description": "Simplest Javascript interception library on the planet!",
   "author": "Buddhike de Silva",
   "license": "MIT",
-  "main": "dist/proxy.js",
+  "main": "dist/intercept.js",
+  "repository": "https://github.com/buddyspike/easy-intercept",
   "scripts": {
     "build": "babel lib/ -d dist/ --source-maps",
     "eslint": "eslint src test",
@@ -13,6 +14,8 @@
     "start": "npm run watch"
   },
   "devDependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-core": "^6.16.0",
     "babel-eslint": "^6.0.4",
     "babel-plugin-transform-async-to-generator": "^6.7.4",
     "babel-plugin-transform-class-properties": "^6.6.0",
@@ -24,7 +27,6 @@
     "nodemon": "^1.9.2"
   },
   "dependencies": {
-    "babel": "^6.5.2",
     "data.maybe": "^1.2.2",
     "ramda": "^0.22.1"
   }
