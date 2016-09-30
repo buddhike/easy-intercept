@@ -1,5 +1,5 @@
 # easy-intercept
->> Simplest Javascript mocking framework on the planet.
+>> Simplest Javascript interception framework on the planet.
 
 easy-intercept is a function interception library, nothing more nor less. It's commonly used for unit testing with other utilities like mocha and proxyquire. However, it can be used for any other intercepting scenarios you fancy.
 
