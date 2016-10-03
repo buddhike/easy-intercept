@@ -175,7 +175,7 @@ describe('Verifying a received call', () => {
   });
 });
 
-describe('receivedAny', () => {
+describe('Checking if any call is made', () => {
   let target;
 
   beforeEach(() => {
@@ -189,6 +189,25 @@ describe('receivedAny', () => {
 
   it('should return false for non-matching calls', () => {
     target.receivedAny('b').should.be.false;
+  });
+});
+
+describe('Access all received calls', () => {
+  let target;
+
+  beforeEach(() => {
+    target = intercept(() => 42);
+    target('a');
+    target('b');
+  });
+
+  it('should return all calls', () => {
+    target.calls().length.should.equal(2);
+  });
+
+  it('should contain the correct arguments', () => {
+    target.calls()[0].args[0].should.equal('a');
+    target.calls()[1].args[0].should.equal('b');
   });
 });
 
