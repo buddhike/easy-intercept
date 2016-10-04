@@ -66,3 +66,51 @@ Use ```proxy._``` match any argument.
 ```javascript
 f.received(intercept._, 'b');
 ```
+
+Receive an array of callInfo containing all calls made to an
+intercepted function.
+```javascript
+f.calls();
+```
+
+Passing an existing functions to ```intercept``` will create a new function
+that can be manipulated as shown in preceding examples. At runtime, if a specific
+behavior cannot be found, the original function is executed.
+
+```javascript
+function add(a, b) {
+  return a + b;
+}
+
+var p = intercept(print);
+p.onCall(0).returns(42);
+p(1, 1); // 42
+p(1, 1); // 2
+
+p.withArgs(10, 5).returns(42);
+p(10, 5); // 42
+p(1, 1); // 2;
+
+p.withArgs(2, 2).throws('doh');
+p(2, 2); // throws
+p(1, 1); // 2
+```
+
+Passing an object to ```intercept``` will create a new object mirroring all
+functions available in the original object. Behavior of these functions is identical
+to the behavior described above.
+
+```Javascript
+function Foo() {
+  this.add = function(a, b) {
+    return a + b;
+  };
+}
+
+var f = new Foo();
+var i = intercept(f);
+
+i.add.firstCall().returns(42);
+i.add(1, 1); // 42
+i.add(2, 2); // 4
+```
