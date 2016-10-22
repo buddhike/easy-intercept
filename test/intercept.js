@@ -138,12 +138,12 @@ describe('Accessing call information', () => {
   });
 
   it('should return arguments used for specified invocation', () => {
-    target.call(0).args[0].should.equal('a');
-    target.call(1).args[0].should.equal('b');
+    target.getCall(0).args[0].should.equal('a');
+    target.getCall(1).args[0].should.equal('b');
   });
 
-  it('should return undefined for invalid calls', () => {
-    (target.call(2) || false).should.be.false;
+  it('should return undefined for invalid invocations', () => {
+    (target.getCall(2) || false).should.be.false;
   });
 });
 
@@ -436,5 +436,28 @@ describe('Intercept an object with functions', () => {
     it('should be visible to proxied function', () => {
       target.getState().should.equal(42);
     });
+  });
+});
+
+describe('callsites of different kinds', () => {
+  let target;
+
+  beforeEach(() => {
+    target = intercept();
+  });
+
+  it('should work for standard invocations', () => {
+    target();
+    target.calls().length.should.equal(1);
+  });
+
+  it('should work for call invocations', () => {
+    target.call(null);
+    target.calls().length.should.equal(1);
+  });
+
+  it('should work for apply invocations', () => {
+    target.apply(null);
+    target.calls().length.should.equal(1);
   });
 });
